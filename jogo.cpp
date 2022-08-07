@@ -11,14 +11,10 @@
 
 #define PN cout << '\n'
 
-
-
 using namespace std;
 
 char * Origin_Addr, * Target_Addr;
 unsigned short Origin_Port, Target_Port;
-
-
 unsigned Tokens = 5, Bat = 0;
 
 
@@ -137,10 +133,6 @@ int main(int argc, char * argv[]) {
 
     // srand(time(NULL));
     
-    // // init_con();
-    // // do_magic(argv);
-
-    // roll_dices();
-
-    cout << is_high_seq({1, 2, 3, 4, 5});
+    // init_con(Origin_Addr, Origin_Port, Target_Addr, Target_Port);
+    // do_magic(argv);
 }
