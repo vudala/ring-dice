@@ -1,5 +1,23 @@
+#!/bin/bash
 
+CC=g++
+FLAGS=-Wall -std=c++17
+SRC=$(wildcard *.cpp)
+OBJS=$(subst .cpp,.o,$(SRC))
+OUTPUT=program
+RM=rm -f
 
+all: $(OBJS)
+	$(CC) $(FLAGS) $(OBJS) -o $(OUTPUT) $(LIBS)
 
-all:
-	g++ -g -Wall -std=c++17 jogo.cpp message.cpp dices.cpp server.cpp -o program
+%.o: %.cpp
+	$(CC) $(FLAGS) -c $< $(LIBS)
+
+run:
+	./program
+
+clean:
+	@$(RM) $(OBJS)
+
+purge: clean
+	@$(RM) $(OUTPUT)
