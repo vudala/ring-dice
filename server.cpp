@@ -95,6 +95,7 @@ int recv_bat() {
 
 
 int validate_msg(Message * msg) {
+    std::cout << (unsigned) count_1s(msg) << ' ' << (unsigned) msg->count << '\n';
     if (count_1s(msg) == msg->count)
         return 1;
     return 0;
@@ -105,7 +106,35 @@ Message * recv_msg() {
     recvfrom(sockfd, (char *) buffer, MAXLINE, MSG_WAITALL, NULL, 0);
     Message * msg = (Message*) malloc(sizeof(Message));
     memcpy(msg, buffer, sizeof(Message));
+    return msg;
     if (validate_msg(msg))
         return msg;
     return NULL;
+}
+
+
+Message * build_msg(unsigned char combination, unsigned char bet, unsigned char type, unsigned char status) {
+    Message * msg = (Message*) malloc(sizeof(msg));
+    msg->combination = combination;
+    msg->bet = bet;
+    msg->origin_addr = Origin.sin_addr.s_addr;
+    msg->origin_port = Origin.sin_port;
+    msg->target_addr = Target.sin_addr.s_addr;
+    msg->target_port = Target.sin_port;
+    msg->chosen_addr = Origin.sin_addr.s_addr;
+    msg->chosen_port = Origin.sin_port;
+    msg->type = type;
+    msg->status = status;
+    msg->count = count_1s(msg);
+    return msg;
+}
+
+
+
+struct sockaddr_in get_origin(){
+    return Origin;
+}
+
+struct sockaddr_in get_target(){
+    return Target;
 }

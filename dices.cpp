@@ -2,7 +2,7 @@
 
 using namespace std;
 
-vector<int> scores = {2, 3, 4, 5, 7, 7, 10, 15};
+vector<int> scores = {0, 2, 3, 4, 5, 7, 7, 10, 15};
 
 int has_pair(vector<int>& dices) {
     for(int i = 0; i < 4; i++) {
@@ -113,7 +113,7 @@ int has_quintet(vector<int>& dices) {
 };
 
 
-int get_score(int chosen, vector<int>& dices) {
+unsigned get_score(unsigned chosen, vector<int>& dices) {
     switch(chosen) {
         case PAIR: return has_pair(dices) * scores[PAIR];
         case TRIO: return has_trio(dices) * scores[TRIO];
@@ -123,7 +123,23 @@ int get_score(int chosen, vector<int>& dices) {
         case HIGH_SEQ: return has_high_seq(dices) * scores[HIGH_SEQ];
         case QUATRAIN: return has_quatrain(dices) * scores[QUATRAIN];
         case QUINTET: return has_quintet(dices) * scores[QUINTET];
-        default:
-            return 0;
+        default: return 0;
     }
+}
+
+
+char * get_label(unsigned chosen) {
+    char * lab;
+    switch(chosen) {
+        case PAIR: lab = "Par"; break;
+        case TRIO: lab = "Trinca"; break;
+        case D_PAIR: lab = "Dois pares"; break;
+        case FULL_HOUSE: lab = "Full House"; break;
+        case LOW_SEQ: lab = "Sequência baixa"; break;
+        case HIGH_SEQ: lab = "Sequência alta"; break;
+        case QUATRAIN: lab = "Quadra"; break;
+        case QUINTET: lab = "Quinteto"; break;
+        default: lab = "NULL"; break;
+    }
+    return lab;
 }

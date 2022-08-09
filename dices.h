@@ -4,7 +4,7 @@
 #include <bits/stdc++.h>
 
 enum Combinations {
-    PAIR = 0,
+    PAIR = 1,
     TRIO,
     D_PAIR,
     FULL_HOUSE,
@@ -22,5 +22,9 @@ int has_low_seq(std::vector<int>& dices);
 int has_high_seq(std::vector<int>& dices);
 int has_quatrain(std::vector<int>& dices);
 int has_quintet(std::vector<int>& dices);
+
+
+unsigned get_score(unsigned chosen, std::vector<int>& dices);
+char * get_label(unsigned chosen);
 
 #endif

@@ -18,4 +18,13 @@ int recv_bat();
 // Passa o bastão
 void send_bat();
 
+
+// Preenche uma mensagem com os campos a serem enviados
+Message * build_msg(unsigned char combination, unsigned char bet, unsigned char type, unsigned char status);
+
+
+struct sockaddr_in get_origin();
+
+struct sockaddr_in get_target();
+
 #endif
