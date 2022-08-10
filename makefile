@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CC=g++
-FLAGS=-Wall -std=c++17
+FLAGS=-Wall -std=c++17 -g
 SRC=$(wildcard *.cpp)
 OBJS=$(subst .cpp,.o,$(SRC))
 OUTPUT=program

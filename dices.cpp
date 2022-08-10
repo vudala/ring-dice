@@ -2,7 +2,7 @@
 
 using namespace std;
 
-vector<int> scores = {0, 2, 3, 4, 5, 7, 7, 10, 15};
+const vector<int> scores = {0, 2, 3, 4, 5, 7, 7, 10, 15};
 
 int has_pair(vector<int>& dices) {
     for(int i = 0; i < 4; i++) {

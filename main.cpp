@@ -14,7 +14,7 @@ char * Origin_Addr, * Target_Addr;
 unsigned short Origin_Port, Target_Port;
 unsigned Is_Origin = 0;
 
-// Driver code 
+// driver code 
 int main(int argc, char * argv[]) {
     Origin_Addr = argv[1];
     Origin_Port = stoi(argv[2]);

@@ -9,16 +9,21 @@
 
 #include "server.h"
 
-#define MAXLINE 1024
-
+// socket file descriptor
 int sockfd; 
+
+
+// buffer pra receber dados
+#define MAXLINE 1024
 char buffer[MAXLINE];
+
+// dados da conexao
 struct sockaddr_in Origin, Target;
 char * _Origin_Addr, * _Target_Addr;
 unsigned short _Origin_Port, _Target_Port;
 
 
-// set the info for the origin
+// seta dados da origem
 void set_origin() {
     memset(&Origin, 0, sizeof(Origin));
     Origin.sin_family = AF_INET; // IPv4 
@@ -27,7 +32,7 @@ void set_origin() {
 }
 
 
-// set the info for the target
+// setta dados do alvo
 void set_target() {
     memset(&Target, 0, sizeof(Target));
     Target.sin_family = AF_INET; // IPv4 
@@ -37,6 +42,7 @@ void set_target() {
 }
 
 
+// inicializa estruturas
 void init_con(char * addr1, unsigned short port1, char * addr2, unsigned short port2) {
     _Origin_Addr = addr1;
     _Origin_Port = port1;
@@ -60,6 +66,7 @@ void init_con(char * addr1, unsigned short port1, char * addr2, unsigned short p
 }
 
 
+// passa o bastao
 void send_bat() {
     char bat[] = "BAT";
     sendto(
@@ -73,6 +80,7 @@ void send_bat() {
 }
 
 
+// envia msg pra frente
 void send_msg(Message * msg) {
     sendto(
         sockfd,
@@ -85,6 +93,7 @@ void send_msg(Message * msg) {
 }
 
 
+// recebe bastao
 int recv_bat() {
     recvfrom(sockfd, (char *) buffer, MAXLINE, MSG_WAITALL, NULL, 0);
     char bat[] = "BAT";
@@ -94,25 +103,26 @@ int recv_bat() {
 }
 
 
+// valida mensagem por paridade horizontal
 int validate_msg(Message * msg) {
-    std::cout << (unsigned) count_1s(msg) << ' ' << (unsigned) msg->count << '\n';
     if (count_1s(msg) == msg->count)
         return 1;
     return 0;
 }
 
 
+// recebe mensagem e valida
 Message * recv_msg() {
     recvfrom(sockfd, (char *) buffer, MAXLINE, MSG_WAITALL, NULL, 0);
     Message * msg = (Message*) malloc(sizeof(Message));
     memcpy(msg, buffer, sizeof(Message));
-    return msg;
-    if (validate_msg(msg))
+    if (validate_msg(msg) || msg->status != PLAY)
         return msg;
     return NULL;
 }
 
 
+// constroi uma mensagem
 Message * build_msg(unsigned char combination, unsigned char bet, unsigned char type, unsigned char status) {
     Message * msg = (Message*) malloc(sizeof(msg));
     msg->combination = combination;
@@ -128,7 +138,6 @@ Message * build_msg(unsigned char combination, unsigned char bet, unsigned char 
     msg->count = count_1s(msg);
     return msg;
 }
-
 
 
 struct sockaddr_in get_origin(){
