@@ -1,5 +1,3 @@
-// Server side implementation of UDP client-server model 
-
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h> 
@@ -10,16 +8,11 @@
 #include "dices.h"
 #include "game.h"
 
-#define PN cout << '\n'
-
 using namespace std;
 
 char * Origin_Addr, * Target_Addr;
 unsigned short Origin_Port, Target_Port;
 unsigned Is_Origin = 0;
-
-
-
 
 // Driver code 
 int main(int argc, char * argv[]) {

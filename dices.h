@@ -4,7 +4,8 @@
 #include <bits/stdc++.h>
 
 enum Combinations {
-    PAIR = 1,
+    NONE = 0,
+    PAIR,
     TRIO,
     D_PAIR,
     FULL_HOUSE,

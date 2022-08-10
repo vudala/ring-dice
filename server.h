@@ -27,4 +27,6 @@ struct sockaddr_in get_origin();
 
 struct sockaddr_in get_target();
 
+int validate_msg(Message * msg);
+
 #endif

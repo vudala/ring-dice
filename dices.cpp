@@ -6,12 +6,9 @@ vector<int> scores = {0, 2, 3, 4, 5, 7, 7, 10, 15};
 
 int has_pair(vector<int>& dices) {
     for(int i = 0; i < 4; i++) {
-        int count = 1;
-        for(int j = i; j < 5; j++)
+        for(int j = i+1; j < 5; j++)
             if (dices[i] == dices[j])
-                count++;
-        if (count >= 2)
-            return 1;
+                return 1;
     }
     return 0;
 }
@@ -20,7 +17,7 @@ int has_pair(vector<int>& dices) {
 int has_trio(vector<int>& dices) {
     for(int i = 0; i < 3; i++) {
         int count = 1;
-        for(int j = i; j < 5; j++)
+        for(int j = i+1; j < 5; j++)
             if (dices[i] == dices[j])
                 count++;
         if (count >= 3)
@@ -123,7 +120,7 @@ unsigned get_score(unsigned chosen, vector<int>& dices) {
         case HIGH_SEQ: return has_high_seq(dices) * scores[HIGH_SEQ];
         case QUATRAIN: return has_quatrain(dices) * scores[QUATRAIN];
         case QUINTET: return has_quintet(dices) * scores[QUINTET];
-        default: return 0;
+        default: return scores[NONE];
     }
 }
 

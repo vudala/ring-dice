@@ -19,6 +19,7 @@ void init_game(unsigned tok, unsigned ori) {
     Is_Origin_ = ori;
 }
 
+
 unsigned read_combination() {
     unsigned opt = 0;
     while(opt < 1 || opt > 8) {
@@ -28,6 +29,7 @@ unsigned read_combination() {
     }
     return opt;
 }
+
 
 unsigned read_bet() {
     unsigned bet = 0;
@@ -55,6 +57,10 @@ void make_bet(Message * msg) {
             msg->chosen_port = Origin_.sin_port;
         }
     }
+    else {
+        cout << "Você não tem fichas o suficiente para entrar na aposta\n";
+    }
+    cout << "Aguardando a jogada ser concluida\n";
 }
 
 
@@ -120,6 +126,7 @@ bool is_for_me(Message * msg){
     return msg->target_addr == Origin_.sin_addr.s_addr && msg->target_port == Origin_.sin_port;
 }
 
+
 bool am_i_chosen(Message * msg) {
     return msg->chosen_addr == Origin_.sin_addr.s_addr && msg->chosen_port == Origin_.sin_port;
 }
@@ -135,7 +142,7 @@ int make_play(Message * msg){
         cout << "Seu saldo agora é de " << Tokens << " fichas\n";
     }
     else {
-        cout << "Você perdeu " << score << " fichas\n";
+        cout << "Você perdeu " << msg->bet << " fichas\n";
         Tokens -= msg->bet;
         cout << "Seu saldo agora é de " << Tokens << " fichas\n";
     }
@@ -145,93 +152,124 @@ int make_play(Message * msg){
 }
 
 
-void print_msg(Message * m) {
-    cout << m->bet << ' ' << m->combination;PN;
+void send_finish() {
+    cout << "Algum jogador está sem fichas, encerrando o jogo\n";
+    send_bat();
+    send_msg(build_msg(0, 0, FINISH_GAME, 0));
+    exit(0);
+}
+
+
+void send_reset() {
+    cout << "Resetando o jogo\n";
+    send_bat();
+    send_msg(build_msg(0, 0, RESET, 0));
+}
+
+
+bool first = true;
+void origin_side() {
+    if (!first) {
+        recv_bat();
+        recv_msg();
+    }
+    first = false;
+
+    Message * msg = build_msg(read_combination(), read_bet(), 0, 0);
+    send_bat();
+    send_msg(msg);
+    free(msg);
+
+    recv_bat();
+    msg = recv_msg();
+
+    // Se houve erro, reseta o jogo
+    if (!msg) {
+        free(msg);
+        cout << "Houve erro na mensagem recebida";
+        send_reset();
+    }
+    // Se for o escolhido
+    else if (am_i_chosen(msg)) {
+        // Faz a jogada, e se acabou as fichas encerra o jogo
+        if (!make_play(msg)) {
+            cout << "Suas fichas acabaram, encerrando o jogo\n";
+            msg = build_msg(0, 0, FINISH_GAME, 0);
+            send_bat();
+            send_msg(msg);
+            exit(0);
+        }
+        free(msg);
+        // Reseta
+        send_reset();
+    }
+    // Apenas passa pra frente a mensagem
+    else {
+        send_bat();
+        send_msg(msg);
+    }
+}
+
+void player_side() {
+    // Recebe a mensagem
+    recv_bat();
+    Message * msg = recv_msg();
+    if (!msg) {
+        cout << "Houve erro na mensagem recebida";
+        free(msg);
+        send_reset();
+        return;
+    }
+
+    make_bet(msg);
+
+    send_bat();
+    send_msg(msg);
+
+    recv_bat();
+    free(msg);
+    msg = recv_msg();
+
+    // Se houve um erro na mensagem
+    if (!msg) {
+       free(msg);
+       cout << "Houve erro na mensagem recebida";
+       send_reset();
+    }
+    // Se recebeu um comando para encerrar o jogo
+    else if (msg->type == FINISH_GAME) {
+        free(msg);
+        send_finish();
+    }
+    else if (msg->type == RESET) {
+        send_bat();
+        send_msg(msg);
+    }
+    // Se for o escolhido para fazer a jogada
+    else if (am_i_chosen(msg)) {
+        // Faz a jogada, e se acabou as fichas encerra o jogo
+        if (!make_play(msg)) {
+            cout << "Suas fichas acabaram, encerrando o jogo\n";
+            msg = build_msg(0, 0, FINISH_GAME, 0);
+            send_msg(msg);
+            exit(0);
+        };
+        // Reseta
+        free(msg);
+        send_reset();
+    }
+    // Apenas passa pra frente a mensagem
+    else {
+        send_bat();
+        send_msg(msg);
+    }
 }
 
 
 void play_game() {
-    bool first = true;
-    for(;;) {
-        if (Is_Origin_) {
-            if (!first) {
-                recv_bat();
-                recv_msg();
-            }
-            first = false;
-
-            Message * msg = build_msg(read_combination(), read_bet(), 0, 0);
-            send_bat();
-            send_msg(msg);
-            free(msg);
-
-            recv_bat();
-            msg = recv_msg();
-
-            if (am_i_chosen(msg)) {
-                if (!make_play(msg)) {
-                    cout << "Suas fichas acabaram, encerrando o jogo\n";
-                    msg = build_msg(0, 0, FINISH_GAME, 0);
-                    send_bat();
-                    send_msg(msg);
-                    exit(0);
-                }
-                free(msg);
-                msg = build_msg(0, 0, RESET, 0);
-                send_bat();
-                send_msg(msg);
-            }
-            else if (msg->type == FINISH_GAME) {
-                cout << "Algum jogador está sem fichas, encerrando o jogo\n";
-                free(msg);
-                msg = build_msg(0, 0, FINISH_GAME, 0);
-                send_bat();
-                send_msg(msg);
-                exit(0);
-            }
-            else {
-                send_bat();
-                send_msg(msg);
-            }
-        }
-        else {
-            // Recebe a mensagem
-            recv_bat();
-            Message * msg = recv_msg();
-
-            make_bet(msg);
-
-            send_bat();
-            send_msg(msg);
-            recv_bat();
-
-            free(msg);
-            msg = recv_msg();
-            if (am_i_chosen(msg)) {
-                if (!make_play(msg)) {
-                    cout << "Suas fichas acabaram, encerrando o jogo\n";
-                    msg = build_msg(0, 0, FINISH_GAME, 0);
-                    send_msg(msg);
-                    exit(0);
-                };
-                free(msg);
-                msg = build_msg(0, 0, RESET, 0);
-                send_bat();
-                send_msg(msg);
-            }
-            else if (msg->type == FINISH_GAME) {
-                cout << "Algum jogador está sem fichas, encerrando o jogo\n";
-                free(msg);
-                msg = build_msg(0, 0, FINISH_GAME, 0);
-                send_bat();
-                send_msg(msg);
-                exit(0);
-            }
-            else {
-                send_bat();
-                send_msg(msg);
-            }
-        }
-    }
-    
+    for(;;)
+        if (Is_Origin_)
+            origin_side();
+        else
+            player_side();
 }
