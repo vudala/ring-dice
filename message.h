@@ -3,11 +3,12 @@
 #ifndef MESSAGE_INCLUDED
 #define MESSAGE_INCLUDED
 
-#define FLAG 44732
+#define FLAG 22358
 
 enum Msg_Type {
+    BET = 3,
     RESET,
-    BET
+    BAT
 };
 
 

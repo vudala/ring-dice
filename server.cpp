@@ -66,20 +66,6 @@ void init_con(char * addr1, unsigned short port1, char * addr2, unsigned short p
 }
 
 
-// passa o bastao
-void send_bat() {
-    char bat[] = "BAT";
-    sendto(
-        sockfd,
-        (const char *) bat,
-        strlen(bat),  
-        MSG_CONFIRM,
-        (const struct sockaddr *) &Target, 
-        sizeof(Target)
-    );
-}
-
-
 // envia msg pra frente
 void send_msg(Message * msg) {
     sendto(
@@ -90,16 +76,6 @@ void send_msg(Message * msg) {
         (const struct sockaddr *) &Target, 
         sizeof(Target)
     );
-}
-
-
-// recebe bastao
-int recv_bat() {
-    recvfrom(sockfd, (char *) buffer, MAXLINE, MSG_WAITALL, NULL, 0);
-    char bat[] = "BAT";
-    if (strcmp(bat, buffer))
-        return 1;
-    return 0;
 }
 
 

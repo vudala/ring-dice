@@ -139,16 +139,12 @@ int make_play(Message * msg){
     cout << "Você deve formar um(a) " << get_label(msg->combination) << '\n'; 
     vector<int> dices = roll_dices();
     int score = get_score(msg->combination, dices);
-    if (score > 0) {
-        cout << "Você ganhou " << score << " fichas\n";
-        Tokens += score;
-        cout << "Seu saldo agora é de " << Tokens << " fichas\n";
-    }
-    else {
-        cout << "Você perdeu " << msg->bet << " fichas\n";
-        Tokens -= msg->bet;
-        cout << "Seu saldo agora é de " << Tokens << " fichas\n";
-    }
+    cout << "Você perdeu " << msg->bet << " fichas da aposta\n";
+    cout << "E ganhou " << score << " fichas da jogada\n";
+    Tokens += score;
+    Tokens -= msg->bet;
+    cout << "Seu saldo agora é de " << Tokens << " fichas\n";
+
     if (Tokens <= 0)
         return 0;
     return 1;
@@ -156,48 +152,32 @@ int make_play(Message * msg){
 
 
 void send_finish() {
-    send_bat();
     send_msg(build_msg(0, 0, 0, FINISH));
     exit(0);
 }
 
 
 void send_reset() {
-    send_bat();
     send_msg(build_msg(0, 0, RESET, PLAY));
 }
 
 
-bool first = true;
-void origin_side() {
-    if (!first) {
-        recv_bat();
-        Message * m = recv_msg();
-        if (m && m->status != PLAY) {
-            cout << "Algum jogador está sem fichas, encerrando o jogo\n";
-            send_finish();
-        }
-    }
-    first = false;
+void send_bat() {
+    send_msg(build_msg(0, 0, BAT, PLAY));
+}
 
+
+
+void origin_side() {
     // Manda a mensagem inicial
     Message * msg = build_msg(read_combination(), read_bet(), BET, 0);
-    send_bat();
     send_msg(msg);
 
-    // Recebe a mensagem com as informacoes da aposta
-    recv_bat();
     msg = recv_msg();
     
     // Se houve erro na mensagem ou reset
     if (!msg || msg->type == RESET) {
         send_reset();
-        return;
-    }
-    // Caso o jogo tenha encerrado por algum motivo
-    else if (msg->status != PLAY) {
-        cout << "Algum jogador está sem fichas, encerrando o jogo\n";
-        send_finish();
     }
     // Se for o escolhido
     else if (am_i_chosen(msg)) {
@@ -207,26 +187,21 @@ void origin_side() {
             send_finish();
             exit(0);
         }
-        // Reseta
         send_reset();
     }
     // Apenas passa pra frente a mensagem
     else {
-        send_bat();
+        cout << "Aguardando a jogada ser concluida\n";
         send_msg(msg);
     }
+
+    recv_msg();
 }
 
 void player_side() {
     // Recebe a mensagem
-    recv_bat();
     Message * msg = recv_msg();
 
-    // Caso o jogo tenha encerrado por algum motivo
-    if (msg && msg->status != PLAY) {
-        cout << "Algum jogador está sem fichas, encerrando o jogo\n";
-        send_finish();
-    }
     // Caso a mensagem tenha vindo com erro ou reset
     if (!msg || msg->type == RESET) {
         send_reset();
@@ -235,10 +210,9 @@ void player_side() {
 
     // Faz a aposta e envia pra frente
     make_bet(msg);
-    send_bat();
     send_msg(msg);
 
-    recv_bat();
+    // Recebe a jogada
     msg = recv_msg();
     
     // Se recebeu um comando para encerrar o jogo
@@ -253,8 +227,9 @@ void player_side() {
         return;
     }
     else if (msg->type == RESET) {
-       send_reset();
-       return;
+        cout << "reset\n";
+        send_reset();
+        return;
     }
     // Se for o escolhido para fazer a jogada
     else if (am_i_chosen(msg)) {
@@ -267,17 +242,24 @@ void player_side() {
         send_reset();
     }
     // Apenas passa pra frente a mensagem
-    else {
-        send_bat();
+    else
         send_msg(msg);
-    }
 }
 
 
 void play_game() {
-    for(;;)
-        if (Is_Origin_)
+    for(;;) {
+        if (Is_Origin_) {
             origin_side();
-        else
+            Is_Origin_ = false;
+            send_bat();
+        }
+        else {
             player_side();
+            send_reset();
+        }
+        Message * msg = recv_msg();
+        if (msg->type == BAT)
+            Is_Origin_ = true;
+    }
 }
