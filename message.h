@@ -27,6 +27,8 @@ typedef struct message_t {
     unsigned short  target_port; // porta do alvo
     unsigned short  origin_port; // porta de origem
     unsigned        chosen_addr; // endereco do escolhido pra fazer a jogada
+    unsigned        target_addr; // endereco do alvo
+    unsigned        origin_addr; // endereco de origem
     unsigned short  flag;
 } Message;
 
