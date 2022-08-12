@@ -125,6 +125,7 @@ Message * recv_msg() {
 // constroi uma mensagem
 Message * build_msg(unsigned char combination, unsigned char bet, unsigned char type, unsigned char status) {
     Message * msg = (Message*) malloc(sizeof(msg));
+    msg->flag = FLAG;
     msg->combination = combination;
     msg->bet = bet;
     msg->origin_addr = Origin.sin_addr.s_addr;

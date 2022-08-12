@@ -3,6 +3,7 @@
 #ifndef MESSAGE_INCLUDED
 #define MESSAGE_INCLUDED
 
+#define FLAG 44732
 
 enum Msg_Type {
     RESET,
@@ -17,17 +18,16 @@ enum Msg_Status {
 
 
 typedef struct message_t {
-    unsigned        origin_addr; // endereco de origem
-    unsigned        target_addr; // endereco do alvo
-    unsigned        chosen_addr; // endereco do escolhido pra fazer a jogada
-    unsigned short  origin_port; // porta de origem
-    unsigned short  target_port; // porta do alvo
-    unsigned short  chosen_port; // porta do escolhido pra fazer a jogada
-    unsigned char   type;        // tipo da mensagem
-    unsigned char   status;      // status da mensagem
-    unsigned short  bet;         // valor de aposta
-    unsigned char   combination; // combinacao escolhida
     unsigned char   count;       // contador da paridade horizontal
+    unsigned char   combination; // combinacao escolhida
+    unsigned short  bet;         // valor de aposta
+    unsigned char   status;      // status da mensagem
+    unsigned char   type;        // tipo da mensagem
+    unsigned short  chosen_port; // porta do escolhido pra fazer a jogada
+    unsigned short  target_port; // porta do alvo
+    unsigned short  origin_port; // porta de origem
+    unsigned        chosen_addr; // endereco do escolhido pra fazer a jogada
+    unsigned short  flag;
 } Message;
 
 

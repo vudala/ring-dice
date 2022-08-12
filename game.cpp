@@ -176,8 +176,10 @@ void origin_side() {
     if (!first) {
         recv_bat();
         Message * m = recv_msg();
-        if (m && m->status != PLAY)
+        if (m && m->status != PLAY) {
+            cout << "Algum jogador está sem fichas, encerrando o jogo\n";
             send_finish();
+        }
     }
     first = false;
 
@@ -197,6 +199,7 @@ void origin_side() {
     }
     // Caso o jogo tenha encerrado por algum motivo
     else if (msg->status != PLAY) {
+        cout << "Algum jogador está sem fichas, encerrando o jogo\n";
         send_finish();
     }
     // Se for o escolhido
@@ -224,6 +227,7 @@ void player_side() {
 
     // Caso o jogo tenha encerrado por algum motivo
     if (msg && msg->status != PLAY) {
+        cout << "Algum jogador está sem fichas, encerrando o jogo\n";
         send_finish();
     }
     // Caso a mensagem tenha vindo com erro ou reset
