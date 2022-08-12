@@ -24,11 +24,7 @@ typedef struct message_t {
     unsigned char   status;      // status da mensagem
     unsigned char   type;        // tipo da mensagem
     unsigned short  chosen_port; // porta do escolhido pra fazer a jogada
-    unsigned short  target_port; // porta do alvo
-    unsigned short  origin_port; // porta de origem
     unsigned        chosen_addr; // endereco do escolhido pra fazer a jogada
-    unsigned        target_addr; // endereco do alvo
-    unsigned        origin_addr; // endereco de origem
     unsigned short  flag;
 } Message;
 

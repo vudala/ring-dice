@@ -79,7 +79,6 @@ vector<int> roll_dices() {
     cin >> opt;
     vector<int> dices (5);
     for(int& dice : dices) {
-        usleep(250);
         dice = rand() % 6 + 1;
         cout << dice << ' ';
     }
@@ -90,7 +89,7 @@ vector<int> roll_dices() {
     cin >> qnt;
 
     vector<int> choice;
-    if (qnt > 0) {
+    if (qnt > 0 && qnt < 6) {
         choice = vector<int> (qnt);
         cout << "Quais são os dados? (0 ~ 4)\n";
         for(int& c : choice)
@@ -98,7 +97,6 @@ vector<int> roll_dices() {
 
         cout << "Rerrolando...\n";
         for(int& c : choice) {
-            usleep(250);
             dices[c] = rand() % 6 + 1;
         }
         
@@ -111,7 +109,7 @@ vector<int> roll_dices() {
         cout << "Quantos dados você quer rerrolar?\n";
         cin >> qnt;
 
-        if (qnt > 0) {
+        if (qnt > 0 && qnt < 6) {
             choice = vector<int> (qnt);
             cout << "Quais são os dados? (0 ~ 4)\n";
             for(int& c : choice)
@@ -119,7 +117,6 @@ vector<int> roll_dices() {
 
             cout << "Rerrolando...\n";
             for(int& c : choice) {
-                usleep(250);
                 dices[c] = rand() % 6 + 1;
             }
         }
@@ -244,8 +241,13 @@ void player_side() {
     recv_bat();
     msg = recv_msg();
     
+    // Se recebeu um comando para encerrar o jogo
+    if (msg && msg->status != PLAY) {
+        cout << "Algum jogador está sem fichas, encerrando o jogo\n";
+        send_finish();
+    }
     // Se houve um erro na mensagem
-    if (!msg) {
+    else if (!msg) {
         cout << "Erro detectado, resetando o jogo\n";
         send_reset();
         return;
@@ -253,11 +255,6 @@ void player_side() {
     else if (msg->type == RESET) {
        send_reset();
        return;
-    }
-    // Se recebeu um comando para encerrar o jogo
-    else if (msg->status != PLAY) {
-        cout << "Algum jogador está sem fichas, encerrando o jogo\n";
-        send_finish();
     }
     // Se for o escolhido para fazer a jogada
     else if (am_i_chosen(msg)) {

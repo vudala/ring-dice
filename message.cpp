@@ -4,15 +4,7 @@ unsigned count_1s(Message * msg)
 {
     unsigned aux;
     unsigned count = 0;
-    for(aux = msg->origin_addr; aux; aux >>= 1)
-        count += (aux & 1);
-    for(aux = msg->target_addr; aux; aux >>= 1)
-        count += (aux & 1);
     for(aux = msg->chosen_addr; aux; aux >>= 1)
-        count += (aux & 1);
-    for(aux = msg->origin_port; aux; aux >>= 1)
-        count += (aux & 1);
-    for(aux = msg->target_port; aux; aux >>= 1)
         count += (aux & 1);
     for(aux = msg->chosen_port; aux; aux >>= 1)
         count += (aux & 1);

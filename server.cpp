@@ -128,10 +128,6 @@ Message * build_msg(unsigned char combination, unsigned char bet, unsigned char 
     msg->flag = FLAG;
     msg->combination = combination;
     msg->bet = bet;
-    msg->origin_addr = Origin.sin_addr.s_addr;
-    msg->origin_port = Origin.sin_port;
-    msg->target_addr = Target.sin_addr.s_addr;
-    msg->target_port = Target.sin_port;
     msg->chosen_addr = Origin.sin_addr.s_addr;
     msg->chosen_port = Origin.sin_port;
     msg->type = type;
