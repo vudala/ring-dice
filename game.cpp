@@ -167,7 +167,6 @@ void send_bat() {
 }
 
 
-
 void origin_side() {
     // Manda a mensagem inicial
     Message * msg = build_msg(read_combination(), read_bet(), BET, 0);
@@ -195,7 +194,11 @@ void origin_side() {
         send_msg(msg);
     }
 
-    recv_msg();
+    msg = recv_msg();
+    if (msg && msg->status != PLAY) {
+        cout << "Algum jogador está sem fichas, encerrando o jogo\n";
+        send_finish();
+    }
 }
 
 void player_side() {
