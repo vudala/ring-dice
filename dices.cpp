@@ -128,15 +128,15 @@ unsigned get_score(unsigned chosen, vector<int>& dices) {
 char * get_label(unsigned chosen) {
     char * lab;
     switch(chosen) {
-        case PAIR: lab = "Par"; break;
-        case TRIO: lab = "Trinca"; break;
-        case D_PAIR: lab = "Dois pares"; break;
-        case FULL_HOUSE: lab = "Full House"; break;
-        case LOW_SEQ: lab = "Sequência baixa"; break;
-        case HIGH_SEQ: lab = "Sequência alta"; break;
-        case QUATRAIN: lab = "Quadra"; break;
-        case QUINTET: lab = "Quinteto"; break;
-        default: lab = "NULL"; break;
+        case PAIR: lab = (char *) "Par"; break;
+        case TRIO: lab = (char *) "Trinca"; break;
+        case D_PAIR: lab = (char *) "Dois pares"; break;
+        case FULL_HOUSE: lab = (char *) "Full House"; break;
+        case LOW_SEQ: lab = (char *) "Sequência baixa"; break;
+        case HIGH_SEQ: lab = (char *) "Sequência alta"; break;
+        case QUATRAIN: lab = (char *) "Quadra"; break;
+        case QUINTET: lab = (char *) "Quinteto"; break;
+        default: lab = (char *) "NULL"; break;
     }
     return lab;
 }
