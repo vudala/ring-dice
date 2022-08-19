@@ -3,7 +3,7 @@
 
 
 // Inicializa estruturas
-void init_game(unsigned tok, unsigned ori);
+void init_game(unsigned id, unsigned tok, unsigned ori);
 
 // Joga o jogo
 void play_game();

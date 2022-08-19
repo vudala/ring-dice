@@ -8,16 +8,21 @@
 using namespace std;
 #define PN cout << '\n'
 
+unsigned ID_;
 struct sockaddr_in Origin_, Target_;
 unsigned Tokens = 5, Is_Origin_ = 0;
 
+vector<unsigned> Scores;
+
 
 // inicializa estruturas
-void init_game(unsigned tok, unsigned ori) {
+void init_game(unsigned id, unsigned tok, unsigned ori) {
+    ID_ = id;
     Origin_ = get_origin();
     Target_ = get_target();
     Tokens = tok;
     Is_Origin_ = ori;
+    Scores = {tok, tok, tok, tok};
 }
 
 
@@ -167,6 +172,17 @@ void send_bat() {
 }
 
 
+
+void print_scores() {
+    cout << "x-------- SCORES --------x\n";
+    for(unsigned i = 0; i < 4; i++)
+        if (i == ID_)
+            cout << "Você:     " << Tokens << " fichas\n";
+        else
+            cout << "Player " << i << ": "  << Tokens << " fichas\n";
+    cout << "x-------- xxxxxx --------x\n";
+}
+
 void origin_side() {
     // Manda a mensagem inicial
     Message * msg = build_msg(read_combination(), read_bet(), BET, 0);
@@ -251,6 +267,9 @@ void player_side() {
 
 
 void play_game() {
+    cout << "Bem vindo ao jogo!\n";
+    cout << "Aqui estão os scores iniciais\n";
+    print_scores();
     for(;;) {
         if (Is_Origin_) {
             origin_side();
