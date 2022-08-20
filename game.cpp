@@ -156,14 +156,16 @@ bool is_over() {
     return 0;
 }
 
+
 void send_reset() {
-    send_msg(build_msg(0, 0, 0, RESET));
+    send_msg(build_msg(0, 0, 31, RESET));
 }
 
 
 void send_bat() {
     send_msg(build_msg(0, 0, 33, BAT));
 }
+
 
 void send_update_bal() {
     send_msg(build_msg(ID_, 0, Tokens, BAL_UPDATE));
@@ -178,29 +180,27 @@ void print_scores() {
             cout << "Você:     " << Scores[i] << " fichas\n";
         else
             cout << "Player " << i << ": "  << Scores[i] << " fichas\n";
-    cout << "x-------- xxxxxx --------x\n";
+    cout << "x-------- xxxxxx --------x\n\n";
 }
 
 void origin_side() {
+    cout << "Sua vez de fazer as apostas\n";
     // Manda a mensagem inicial
     Message * msg = build_msg(ID_, read_combination(), read_bet(), BET);
     send_msg(msg);
 
     msg = recv_msg();
     
-    // Se houve erro na mensagem ou reset
-    if (!msg || msg->type == RESET) {
-        send_reset();
-        return;
-    }
     // Se for o escolhido
-    else if (am_i_chosen(msg)) {
+    if (am_i_chosen(msg)) {
         // Faz a jogada, e se acabou as fichas encerra o jogo
         make_play(msg);
 
         print_scores();
 
         send_update_bal();
+
+        recv_msg();
     }
     // Apenas passa pra frente a mensagem
     else {
@@ -228,12 +228,6 @@ void player_side() {
     // Recebe a mensagem
     Message * msg = recv_msg();
 
-    // Caso a mensagem tenha vindo com erro ou reset
-    if (!msg || msg->type == RESET) {
-        send_reset();
-        return;
-    }
-
     // Faz a aposta e envia pra frente
     make_bet(msg);
     send_msg(msg);
@@ -242,10 +236,16 @@ void player_side() {
     // Recebe a jogada
     msg = recv_msg();
     
-    // Se houve um erro na mensagem
-    if (!msg || msg->type == RESET) {
-        send_reset();
-        return;
+    // Se for o escolhido para fazer a jogada
+    if (am_i_chosen(msg)) {
+        // Faz a jogada
+        make_play(msg);
+
+        print_scores();
+
+        send_update_bal();
+
+        recv_msg();
     }
     else if (msg->type == BAL_UPDATE) {
         cout << "Player " << msg->chosen_id << " realizou a jogada\n";
@@ -257,15 +257,6 @@ void player_side() {
             cout << "Encerrando o jogo\n";
             exit(0);
         }
-    }
-    // Se for o escolhido para fazer a jogada
-    else if (am_i_chosen(msg)) {
-        // Faz a jogada, e se acabou as fichas encerra o jogo
-        make_play(msg);
-
-        print_scores();
-
-        send_update_bal();
     }
     // Apenas passa pra frente a mensagem
     else {
