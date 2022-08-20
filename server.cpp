@@ -81,6 +81,7 @@ void send_msg(Message * msg)
 // valida mensagem por paridade horizontal
 int validate_msg(Message * msg)
 {
+    if (rand() % 15 == 14) return 0;
     if (count_1s(msg) == msg->count)
         return 1;
     return 0;

@@ -9,7 +9,8 @@ enum Msg_Type {
     BET = 3,
     RESET,
     BAT,
-    BAL_UPDATE
+    BAL_UPDATE,
+    FINISH
 };
 
 

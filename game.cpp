@@ -142,8 +142,8 @@ void make_play(Message * msg){
     int score = get_score(msg->combination, dices);
     cout << "Você perdeu " << msg->bet << " fichas da aposta\n";
     cout << "E ganhou " << score << " fichas da jogada\n";
-    Tokens += score;
-    Tokens -= msg->bet;
+    Tokens += score - msg->bet;
+    Scores[ID] = Tokens;
 }
 
 
@@ -170,6 +170,12 @@ void send_update_bal() {
 }
 
 
+void send_finish() {
+    cout << "Erro detectado, encerrando execução\n";
+    send_msg(build_msg(0, 0, 37, FINISH));
+    exit(-1);
+}
+
 
 void print_scores() {
     cout << "\nx-------- SCORES --------x\n";
@@ -189,9 +195,8 @@ int origin_side() {
 
     msg = recv_msg();
     // Se deu erro
-    if (!msg || msg->type == RESET) {
-        send_reset();
-        return 0;
+    if (!msg || msg->type == FINISH) {
+        send_finish();
     }
     // Se for o escolhido
     else if (am_i_chosen(msg)) {
@@ -202,11 +207,16 @@ int origin_side() {
 
         send_update_bal();
 
+        if (is_over()) {
+            cout << "Você está sem fichas\n"; 
+            cout << "Encerrando o jogo\n";
+            exit(0);
+        }
+
         msg = recv_msg();
         // Se deu erro
-        if (!msg || msg->type == RESET) {
-            send_reset();
-            return 0;
+        if (!msg || msg->type == FINISH) {
+            send_finish();
         }
     }
     // Apenas passa pra frente a mensagem
@@ -216,9 +226,8 @@ int origin_side() {
 
         msg = recv_msg();
         // Se deu erro
-        if (!msg || msg->type == RESET) {
-            send_reset();
-            return 0;
+        if (!msg || msg->type == FINISH) {
+            send_finish();
         }
         else if (msg->type == BAL_UPDATE) {
             cout << "Player " << msg->chosen_id << " realizou a jogada\n";
@@ -241,9 +250,8 @@ int player_side() {
     // Recebe a mensagem
     Message * msg = recv_msg();
 
-    if (!msg || msg->type == RESET) {
-        send_reset();
-        return 0;
+    if (!msg || msg->type == FINISH) {
+        send_finish();
     }
 
     // Faz a aposta e envia pra frente
@@ -255,9 +263,8 @@ int player_side() {
     msg = recv_msg();
 
     // Se deu erro
-    if (!msg || msg->type == RESET) {
-        send_reset();
-        return 0;
+    if (!msg || msg->type == FINISH) {
+        send_finish();
     }
     // Se for o escolhido para fazer a jogada
     else if (am_i_chosen(msg)) {
@@ -268,11 +275,16 @@ int player_side() {
 
         send_update_bal();
 
+        if (is_over()) {
+            cout << "Você está sem fichas\n"; 
+            cout << "Encerrando o jogo\n";
+            exit(0);
+        }
+
         msg = recv_msg();
         // Se deu erro
-        if (!msg || msg->type == RESET) {
-            send_reset();
-            return 0;
+        if (!msg || msg->type == FINISH) {
+            send_finish();
         }
     }
     else if (msg->type == BAL_UPDATE) {
@@ -292,9 +304,8 @@ int player_side() {
 
         // Fica aguardando um update bal
         msg = recv_msg();
-        if (!msg || msg->type == RESET) {
-            send_reset();
-            return 0;
+        if (!msg || msg->type == FINISH) {
+            send_finish();
         }
         else if (msg->type == BAL_UPDATE) {
             cout << "Player " << msg->chosen_id << " realizou a jogada\n";
@@ -321,27 +332,20 @@ void play_game() {
         Last_Tokens = Tokens;
         Last_Scores = Scores;
         if (Is_Origin) {
-            if (origin_side()) {
-                Is_Origin = false;
-                send_bat();
-                recv_msg();
-            }
-            else {
-                Tokens = Last_Tokens;
-                Scores = Last_Scores;
-            }
+            origin_side();
+            Is_Origin = false;
+            send_bat();
+            if (!recv_msg())
+                send_finish();
         }
         else {
-            if (player_side()) {
-                send_reset();
-                Message * msg = recv_msg();
-                if (msg->type == BAT)
-                    Is_Origin = true;  
-            }
-            else {
-                Tokens = Last_Tokens;
-                Scores = Last_Scores;
-            }
+            player_side();
+            send_reset();
+            Message * msg = recv_msg();
+            if (!msg)
+                send_finish();
+            else if (msg->type == BAT)
+                Is_Origin = true;    
         }
     }
 }
