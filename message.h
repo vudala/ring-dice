@@ -8,13 +8,8 @@
 enum Msg_Type {
     BET = 3,
     RESET,
-    BAT
-};
-
-
-enum Msg_Status {
-    PLAY = 0,
-    FINISH = 255
+    BAT,
+    BAL_UPDATE
 };
 
 
@@ -22,10 +17,8 @@ typedef struct message_t {
     unsigned char   count;       // contador da paridade horizontal
     unsigned char   combination; // combinacao escolhida
     unsigned short  bet;         // valor de aposta
-    unsigned char   status;      // status da mensagem
     unsigned char   type;        // tipo da mensagem
-    unsigned short  chosen_port; // porta do escolhido pra fazer a jogada
-    unsigned        chosen_addr; // endereco do escolhido pra fazer a jogada
+    unsigned        chosen_id;   // id do jogador referenciado
     unsigned short  flag;
 } Message;
 

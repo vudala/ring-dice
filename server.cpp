@@ -24,7 +24,8 @@ unsigned short _Origin_Port, _Target_Port;
 
 
 // seta dados da origem
-void set_origin() {
+void set_origin()
+{
     memset(&Origin, 0, sizeof(Origin));
     Origin.sin_family = AF_INET; // IPv4 
     inet_aton(_Origin_Addr, &Origin.sin_addr);
@@ -33,7 +34,8 @@ void set_origin() {
 
 
 // setta dados do alvo
-void set_target() {
+void set_target()
+{
     memset(&Target, 0, sizeof(Target));
     Target.sin_family = AF_INET; // IPv4 
     inet_aton(_Target_Addr, &Target.sin_addr);
@@ -43,7 +45,8 @@ void set_target() {
 
 
 // inicializa estruturas
-void init_con(char * addr1, unsigned short port1, char * addr2, unsigned short port2) {
+void init_con(char * addr1, unsigned short port1, char * addr2, unsigned short port2)
+{
     _Origin_Addr = addr1;
     _Origin_Port = port1;
     _Target_Addr = addr2;
@@ -67,7 +70,8 @@ void init_con(char * addr1, unsigned short port1, char * addr2, unsigned short p
 
 
 // envia msg pra frente
-void send_msg(Message * msg) {
+void send_msg(Message * msg)
+{
     sendto(
         sockfd,
         (const char *) msg,
@@ -80,7 +84,8 @@ void send_msg(Message * msg) {
 
 
 // valida mensagem por paridade horizontal
-int validate_msg(Message * msg) {
+int validate_msg(Message * msg)
+{
     if (count_1s(msg) == msg->count)
         return 1;
     return 0;
@@ -88,35 +93,37 @@ int validate_msg(Message * msg) {
 
 
 // recebe mensagem e valida
-Message * recv_msg() {
+Message * recv_msg()
+{
     recvfrom(sockfd, (char *) buffer, MAXLINE, MSG_WAITALL, NULL, 0);
     Message * msg = (Message*) malloc(sizeof(Message));
     memcpy(msg, buffer, sizeof(Message));
-    if (validate_msg(msg) || msg->status != PLAY)
+    if (validate_msg(msg))
         return msg;
     return NULL;
 }
 
 
 // constroi uma mensagem
-Message * build_msg(unsigned char combination, unsigned char bet, unsigned char type, unsigned char status) {
+Message * build_msg(unsigned chos_id, unsigned char combination, unsigned char bet, unsigned char type)
+{
     Message * msg = (Message*) malloc(sizeof(msg));
     msg->flag = FLAG;
     msg->combination = combination;
     msg->bet = bet;
-    msg->chosen_addr = Origin.sin_addr.s_addr;
-    msg->chosen_port = Origin.sin_port;
+    msg->chosen_id = chos_id;
     msg->type = type;
-    msg->status = status;
     msg->count = count_1s(msg);
     return msg;
 }
 
 
-struct sockaddr_in get_origin(){
+struct sockaddr_in get_origin()
+{
     return Origin;
 }
 
-struct sockaddr_in get_target(){
+struct sockaddr_in get_target()
+{
     return Target;
 }

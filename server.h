@@ -19,7 +19,7 @@ int recv_bat();
 void send_bat();
 
 // Preenche uma mensagem com os campos a serem enviados
-Message * build_msg(unsigned char combination, unsigned char bet, unsigned char type, unsigned char status);
+Message * build_msg(unsigned chos_id, unsigned char combination, unsigned char bet, unsigned char type);
 
 // Retorna a origem
 struct sockaddr_in get_origin();
