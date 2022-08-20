@@ -4,7 +4,7 @@
 #include "message.h"
 
 // Inicia a conexão com o socket
-void init_con(char * addr1, unsigned short port1, char * addr2, unsigned short port2);
+void init_con();
 
 // Envia uma mensagem
 void send_msg(Message * msg);

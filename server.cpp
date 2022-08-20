@@ -19,8 +19,8 @@ char buffer[MAXLINE];
 
 // dados da conexao
 struct sockaddr_in Origin, Target;
-char * _Origin_Addr, * _Target_Addr;
-unsigned short _Origin_Port, _Target_Port;
+extern char * Origin_Addr, * Target_Addr;
+extern unsigned short Origin_Port, Target_Port;
 
 
 // seta dados da origem
@@ -28,8 +28,8 @@ void set_origin()
 {
     memset(&Origin, 0, sizeof(Origin));
     Origin.sin_family = AF_INET; // IPv4 
-    inet_aton(_Origin_Addr, &Origin.sin_addr);
-    Origin.sin_port = htons(_Origin_Port); 
+    inet_aton(Origin_Addr, &Origin.sin_addr);
+    Origin.sin_port = htons(Origin_Port); 
 }
 
 
@@ -38,20 +38,15 @@ void set_target()
 {
     memset(&Target, 0, sizeof(Target));
     Target.sin_family = AF_INET; // IPv4 
-    inet_aton(_Target_Addr, &Target.sin_addr);
+    inet_aton(Target_Addr, &Target.sin_addr);
 
-    Target.sin_port = htons(_Target_Port); 
+    Target.sin_port = htons(Target_Port); 
 }
 
 
 // inicializa estruturas
-void init_con(char * addr1, unsigned short port1, char * addr2, unsigned short port2)
+void init_con()
 {
-    _Origin_Addr = addr1;
-    _Origin_Port = port1;
-    _Target_Addr = addr2;
-    _Target_Port = port2;
-
     // Creating socket file descriptor 
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) { 
         perror("socket creation failed"); 

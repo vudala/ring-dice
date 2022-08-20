@@ -8,21 +8,19 @@
 using namespace std;
 #define PN cout << '\n'
 
-unsigned ID_;
-struct sockaddr_in Origin_, Target_;
-unsigned Tokens = 5, Is_Origin_ = 0;
+extern unsigned ID;
+extern struct sockaddr_in Origin, Target;
+extern bool Is_Origin;
+unsigned Tokens = 5;
+unsigned Last_Tokens;
 
+vector<unsigned> Last_Scores;
 vector<unsigned> Scores;
 
 
 // inicializa estruturas
-void init_game(unsigned id, unsigned tok, unsigned ori) {
-    ID_ = id;
-    Origin_ = get_origin();
-    Target_ = get_target();
-    Tokens = tok;
-    Is_Origin_ = ori;
-    Scores = {tok, tok, tok, tok};
+void init_game() {
+    Scores = {5, 5, 5, 5};
 }
 
 
@@ -62,7 +60,7 @@ void make_bet(Message * msg) {
         cin >> choice;
         if (choice) {
             msg->bet += 1;
-            msg->chosen_id = ID_;
+            msg->chosen_id = ID;
             msg->count = count_1s(msg);
         }
     }
@@ -133,7 +131,7 @@ vector<int> roll_dices() {
 
 // verifica se é o escolhido pra fazer a jogada
 bool am_i_chosen(Message * msg) {
-    return msg->chosen_id == ID_;
+    return msg->chosen_id == ID;
 }
 
 
@@ -168,7 +166,7 @@ void send_bat() {
 
 
 void send_update_bal() {
-    send_msg(build_msg(ID_, 0, Tokens, BAL_UPDATE));
+    send_msg(build_msg(ID, 0, Tokens, BAL_UPDATE));
 }
 
 
@@ -176,23 +174,27 @@ void send_update_bal() {
 void print_scores() {
     cout << "\nx-------- SCORES --------x\n";
     for(unsigned i = 0; i < 4; i++)
-        if (i == ID_)
+        if (i == ID)
             cout << "Você:     " << Scores[i] << " fichas\n";
         else
             cout << "Player " << i << ": "  << Scores[i] << " fichas\n";
     cout << "x-------- xxxxxx --------x\n\n";
 }
 
-void origin_side() {
+int origin_side() {
     cout << "Sua vez de fazer as apostas\n";
     // Manda a mensagem inicial
-    Message * msg = build_msg(ID_, read_combination(), read_bet(), BET);
+    Message * msg = build_msg(ID, read_combination(), read_bet(), BET);
     send_msg(msg);
 
     msg = recv_msg();
-    
+    // Se deu erro
+    if (!msg || msg->type == RESET) {
+        send_reset();
+        return 0;
+    }
     // Se for o escolhido
-    if (am_i_chosen(msg)) {
+    else if (am_i_chosen(msg)) {
         // Faz a jogada, e se acabou as fichas encerra o jogo
         make_play(msg);
 
@@ -200,7 +202,12 @@ void origin_side() {
 
         send_update_bal();
 
-        recv_msg();
+        msg = recv_msg();
+        // Se deu erro
+        if (!msg || msg->type == RESET) {
+            send_reset();
+            return 0;
+        }
     }
     // Apenas passa pra frente a mensagem
     else {
@@ -208,8 +215,12 @@ void origin_side() {
         send_msg(msg);
 
         msg = recv_msg();
-
-        if (msg->type == BAL_UPDATE) {
+        // Se deu erro
+        if (!msg || msg->type == RESET) {
+            send_reset();
+            return 0;
+        }
+        else if (msg->type == BAL_UPDATE) {
             cout << "Player " << msg->chosen_id << " realizou a jogada\n";
             Scores[msg->chosen_id] = msg->bet;
             print_scores();
@@ -221,12 +232,19 @@ void origin_side() {
             }
         }
     }
+
+    return 1;
 }
 
-void player_side() {
+int player_side() {
     cout << "Aguardando origem\n";
     // Recebe a mensagem
     Message * msg = recv_msg();
+
+    if (!msg || msg->type == RESET) {
+        send_reset();
+        return 0;
+    }
 
     // Faz a aposta e envia pra frente
     make_bet(msg);
@@ -235,9 +253,14 @@ void player_side() {
     cout << "Aguardando a jogada ser concluida\n";
     // Recebe a jogada
     msg = recv_msg();
-    
+
+    // Se deu erro
+    if (!msg || msg->type == RESET) {
+        send_reset();
+        return 0;
+    }
     // Se for o escolhido para fazer a jogada
-    if (am_i_chosen(msg)) {
+    else if (am_i_chosen(msg)) {
         // Faz a jogada
         make_play(msg);
 
@@ -245,7 +268,12 @@ void player_side() {
 
         send_update_bal();
 
-        recv_msg();
+        msg = recv_msg();
+        // Se deu erro
+        if (!msg || msg->type == RESET) {
+            send_reset();
+            return 0;
+        }
     }
     else if (msg->type == BAL_UPDATE) {
         cout << "Player " << msg->chosen_id << " realizou a jogada\n";
@@ -264,7 +292,11 @@ void player_side() {
 
         // Fica aguardando um update bal
         msg = recv_msg();
-        if (msg->type == BAL_UPDATE) {
+        if (!msg || msg->type == RESET) {
+            send_reset();
+            return 0;
+        }
+        else if (msg->type == BAL_UPDATE) {
             cout << "Player " << msg->chosen_id << " realizou a jogada\n";
             Scores[msg->chosen_id] = msg->bet;
             print_scores();
@@ -275,7 +307,9 @@ void player_side() {
                 exit(0);
             }
         }
-    }    
+    }
+
+    return 1;
 }
 
 
@@ -284,17 +318,30 @@ void play_game() {
     cout << "Aqui estão os scores iniciais\n";
     print_scores();
     for(;;) {
-        if (Is_Origin_) {
-            origin_side();
-            Is_Origin_ = false;
-            send_bat();
+        Last_Tokens = Tokens;
+        Last_Scores = Scores;
+        if (Is_Origin) {
+            if (origin_side()) {
+                Is_Origin = false;
+                send_bat();
+                recv_msg();
+            }
+            else {
+                Tokens = Last_Tokens;
+                Scores = Last_Scores;
+            }
         }
         else {
-            player_side();
-            send_reset();
+            if (player_side()) {
+                send_reset();
+                Message * msg = recv_msg();
+                if (msg->type == BAT)
+                    Is_Origin = true;  
+            }
+            else {
+                Tokens = Last_Tokens;
+                Scores = Last_Scores;
+            }
         }
-        Message * msg = recv_msg();
-        if (msg->type == BAT)
-            Is_Origin_ = true;
     }
 }

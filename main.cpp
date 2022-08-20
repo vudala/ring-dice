@@ -13,7 +13,7 @@ using namespace std;
 unsigned ID;
 char * Origin_Addr, * Target_Addr;
 unsigned short Origin_Port, Target_Port;
-unsigned Is_Origin = 0;
+bool Is_Origin;
 
 // driver code 
 int main(int argc, char * argv[]) {
@@ -26,9 +26,9 @@ int main(int argc, char * argv[]) {
 
     srand(time(NULL));
     
-    init_con(Origin_Addr, Origin_Port, Target_Addr, Target_Port);
+    init_con();
 
-    init_game(ID, 5, Is_Origin);
+    init_game();
 
     play_game();
 }
