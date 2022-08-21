@@ -101,12 +101,12 @@ Message * recv_msg()
 
 
 // constroi uma mensagem
-Message * build_msg(unsigned chos_id, unsigned char combination, unsigned char bet, unsigned char type)
+Message * build_msg(unsigned chos_id, unsigned char combination, unsigned char tokens, unsigned char type)
 {
     Message * msg = (Message*) malloc(sizeof(msg));
     msg->flag = FLAG;
     msg->combination = combination;
-    msg->bet = bet;
+    msg->tokens = tokens;
     msg->chosen_id = chos_id;
     msg->type = type;
     msg->count = count_1s(msg);

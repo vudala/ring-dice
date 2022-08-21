@@ -11,10 +11,6 @@ using namespace std;
 extern unsigned ID;
 extern struct sockaddr_in Origin, Target;
 extern bool Is_Origin;
-unsigned Tokens = 5;
-unsigned Last_Tokens;
-
-vector<unsigned> Last_Scores;
 vector<unsigned> Scores;
 
 
@@ -39,8 +35,8 @@ unsigned read_combination() {
 // lê a aposta da origem
 unsigned read_bet() {
     unsigned bet = 0;
-    cout << "Você tem " << Tokens << " fichas\n";
-    while (bet < 1 || bet > Tokens) {
+    cout << "Você tem " << Scores[ID] << " fichas\n";
+    while (bet < 1 || bet > Scores[ID]) {
         cout << "Quanto você deseja apostar?\n";
         cin >> bet;
     }
@@ -51,15 +47,15 @@ unsigned read_bet() {
 // faz a aposta
 void make_bet(Message * msg) {
     cout << "Combinação escolhida: " << get_label(msg->combination) << '\n';
-    cout << "Aposta de " << msg->bet << " fichas\n";
-    cout << "Você tem " << Tokens << " fichas restantes\n";
+    cout << "Aposta de " << msg->tokens << " fichas\n";
+    cout << "Você tem " << Scores[ID] << " fichas restantes\n";
 
-    if (Tokens >= unsigned(msg->bet + 1)) {
+    if (Scores[ID] >= unsigned(msg->tokens + 1)) {
         cout << "Quer aumentar (!0) ou correr (0) ?\n";
         unsigned choice;
         cin >> choice;
         if (choice) {
-            msg->bet += 1;
+            msg->tokens += 1;
             msg->chosen_id = ID;
             msg->count = count_1s(msg);
         }
@@ -140,10 +136,9 @@ void make_play(Message * msg){
     cout << "Você deve formar um(a) " << get_label(msg->combination) << '\n'; 
     vector<int> dices = roll_dices();
     int score = get_score(msg->combination, dices);
-    cout << "Você perdeu " << msg->bet << " fichas da aposta\n";
+    cout << "Você perdeu " << msg->tokens << " fichas da aposta\n";
     cout << "E ganhou " << score << " fichas da jogada\n";
-    Tokens += score - msg->bet;
-    Scores[ID] = Tokens;
+    Scores[ID] += score - msg->tokens;
 }
 
 
@@ -166,7 +161,7 @@ void send_bat() {
 
 
 void send_update_bal() {
-    send_msg(build_msg(ID, 0, Tokens, BAL_UPDATE));
+    send_msg(build_msg(ID, 0, Scores[ID], BAL_UPDATE));
 }
 
 
@@ -232,7 +227,7 @@ int origin_side() {
         }
         else if (msg->type == BAL_UPDATE) {
             cout << "Player " << msg->chosen_id << " realizou a jogada\n";
-            Scores[msg->chosen_id] = msg->bet;
+            Scores[msg->chosen_id] = msg->tokens;
             print_scores();
 
             send_msg(msg);
@@ -292,7 +287,7 @@ int player_side() {
     }
     else if (msg->type == BAL_UPDATE) {
         cout << "Player " << msg->chosen_id << " realizou a jogada\n";
-        Scores[msg->chosen_id] = msg->bet;
+        Scores[msg->chosen_id] = msg->tokens;
         send_msg(msg);
         print_scores();
         if (is_over()) {
@@ -313,7 +308,7 @@ int player_side() {
         }
         else if (msg->type == BAL_UPDATE) {
             cout << "Player " << msg->chosen_id << " realizou a jogada\n";
-            Scores[msg->chosen_id] = msg->bet;
+            Scores[msg->chosen_id] = msg->tokens;
             print_scores();
             send_msg(msg);
             if (is_over()) {
@@ -333,8 +328,6 @@ void play_game() {
     cout << "Aqui estão os scores iniciais\n";
     print_scores();
     for(;;) {
-        Last_Tokens = Tokens;
-        Last_Scores = Scores;
         if (Is_Origin) {
             origin_side();
             Is_Origin = false;

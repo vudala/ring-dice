@@ -17,9 +17,9 @@ enum Msg_Type {
 typedef struct message_t {
     unsigned char   count;       // contador da paridade horizontal
     unsigned char   combination; // combinacao escolhida
-    unsigned short  bet;         // valor de aposta
+    unsigned short  tokens;      // valor de aposta ou novo saldo do jogador que jogou
     unsigned char   type;        // tipo da mensagem
-    unsigned        chosen_id;   // id do jogador referenciado
+    unsigned short  chosen_id;   // id do jogador referenciado
     unsigned short  flag;
 } Message;
 

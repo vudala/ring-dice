@@ -8,7 +8,7 @@ unsigned count_1s(Message * msg)
         count += (aux & 1);
     for(aux = msg->type; aux; aux >>= 1)
         count += (aux & 1);
-    for(aux = msg->bet; aux; aux >>= 1)
+    for(aux = msg->tokens; aux; aux >>= 1)
         count += (aux & 1);
     for(aux = msg->combination; aux; aux >>= 1)
         count += (aux & 1);
