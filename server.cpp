@@ -81,7 +81,9 @@ void send_msg(Message * msg)
 // valida mensagem por paridade horizontal
 int validate_msg(Message * msg)
 {
-    if (rand() % 10 == 9) return 0;
+    #ifdef ARTIFICIAL_ERROR
+    if (rand() % 20 == 19) return 0;
+    #endif
     if (count_1s(msg) == msg->count)
         return 1;
     return 0;
@@ -111,15 +113,4 @@ Message * build_msg(unsigned chos_id, unsigned char combination, unsigned char t
     msg->type = type;
     msg->count = count_1s(msg);
     return msg;
-}
-
-
-struct sockaddr_in get_origin()
-{
-    return Origin;
-}
-
-struct sockaddr_in get_target()
-{
-    return Target;
 }
