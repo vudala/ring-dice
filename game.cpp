@@ -192,9 +192,10 @@ int origin_side() {
     // Manda a mensagem inicial
     Message * msg = build_msg(ID, read_combination(), read_bet(), BET);
     send_msg(msg);
+    cout << "Coletando as apostas\n";
 
     msg = recv_msg();
-    // Se deu erro
+    // Se detectou erro
     if (!msg || msg->type == FINISH) {
         send_finish();
     }
@@ -214,7 +215,7 @@ int origin_side() {
         }
 
         msg = recv_msg();
-        // Se deu erro
+        // Se detectou erro
         if (!msg || msg->type == FINISH) {
             send_finish();
         }
@@ -225,7 +226,7 @@ int origin_side() {
         send_msg(msg);
 
         msg = recv_msg();
-        // Se deu erro
+        // Se detectou erro
         if (!msg || msg->type == FINISH) {
             send_finish();
         }
@@ -233,7 +234,9 @@ int origin_side() {
             cout << "Player " << msg->chosen_id << " realizou a jogada\n";
             Scores[msg->chosen_id] = msg->bet;
             print_scores();
+
             send_msg(msg);
+
             if (is_over()) {
                 cout << "Player " << msg->chosen_id << " está sem fichas\n"; 
                 cout << "Encerrando o jogo\n";
@@ -249,7 +252,7 @@ int player_side() {
     cout << "Aguardando origem\n";
     // Recebe a mensagem
     Message * msg = recv_msg();
-
+    // Se detectou erro
     if (!msg || msg->type == FINISH) {
         send_finish();
     }
@@ -261,11 +264,11 @@ int player_side() {
     cout << "Aguardando a jogada ser concluida\n";
     // Recebe a jogada
     msg = recv_msg();
-
-    // Se deu erro
+    // Se detectou erro
     if (!msg || msg->type == FINISH) {
         send_finish();
     }
+
     // Se for o escolhido para fazer a jogada
     else if (am_i_chosen(msg)) {
         // Faz a jogada
@@ -282,7 +285,7 @@ int player_side() {
         }
 
         msg = recv_msg();
-        // Se deu erro
+        // Se detectou erro
         if (!msg || msg->type == FINISH) {
             send_finish();
         }
@@ -304,6 +307,7 @@ int player_side() {
 
         // Fica aguardando um update bal
         msg = recv_msg();
+        // Se detectou erro
         if (!msg || msg->type == FINISH) {
             send_finish();
         }
@@ -334,18 +338,25 @@ void play_game() {
         if (Is_Origin) {
             origin_side();
             Is_Origin = false;
-            send_bat();
-            if (!recv_msg())
+            Message * msg = recv_msg();
+            // Se detectou erro
+            if (!msg || msg->type == FINISH) {
                 send_finish();
+            }
+
+            send_bat();
         }
         else {
             player_side();
+
             send_reset();
             Message * msg = recv_msg();
-            if (!msg)
+            // Se detectou erro
+            if (!msg || msg->type == FINISH) {
                 send_finish();
-            else if (msg->type == BAT)
-                Is_Origin = true;    
+            }
+            if (msg->type == BAT)
+                Is_Origin = true;
         }
     }
 }
