@@ -10,7 +10,8 @@ enum Msg_Type {
     RESET,
     BAT,
     BAL_UPDATE,
-    FINISH
+    FINISH,
+    RESULT
 };
 
 

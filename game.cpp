@@ -34,13 +34,9 @@ unsigned read_combination() {
 
 // lê a aposta da origem
 unsigned read_bet() {
-    unsigned bet = 0;
     cout << "Você tem " << Scores[ID] << " fichas\n";
-    while (bet < 1 || bet > Scores[ID]) {
-        cout << "Quanto você deseja apostar?\n";
-        cin >> bet;
-    }
-    return bet;
+    cout << "E gastará uma para escolher a jogada\n";
+    return 1;
 }
 
 
@@ -160,8 +156,13 @@ void send_bat() {
 }
 
 
-void send_update_bal() {
-    send_msg(build_msg(ID, 0, Scores[ID], BAL_UPDATE));
+void send_result(unsigned id, unsigned score) {
+    send_msg(build_msg(id, 0, score, RESULT));
+}
+
+
+void send_bal_update(unsigned id, unsigned score){
+    send_msg(build_msg(id, 0, score, BAL_UPDATE));
 }
 
 
@@ -201,7 +202,7 @@ int origin_side() {
 
         print_scores();
 
-        send_update_bal();
+        send_bal_update(ID, Scores[ID]);
 
         if (is_over()) {
             cout << "Você está sem fichas\n"; 
@@ -225,17 +226,22 @@ int origin_side() {
         if (!msg || msg->type == FINISH) {
             send_finish();
         }
-        else if (msg->type == BAL_UPDATE) {
+        else if (msg->type == RESULT) {
             cout << "Player " << msg->chosen_id << " realizou a jogada\n";
             Scores[msg->chosen_id] = msg->tokens;
             print_scores();
 
-            send_msg(msg);
+            send_bal_update(msg->chosen_id, msg->tokens);
 
             if (is_over()) {
                 cout << "Player " << msg->chosen_id << " está sem fichas\n"; 
                 cout << "Encerrando o jogo\n";
                 exit(0);
+            }
+
+            msg = recv_msg();
+            if (!msg || msg->type == FINISH) {
+                send_finish();
             }
         }
     }
@@ -269,20 +275,22 @@ int player_side() {
         // Faz a jogada
         make_play(msg);
 
-        print_scores();
-
-        send_update_bal();
-
-        if (is_over()) {
-            cout << "Você está sem fichas\n"; 
-            cout << "Encerrando o jogo\n";
-            exit(0);
-        }
+        send_result(ID, Scores[ID]);
 
         msg = recv_msg();
-        // Se detectou erro
         if (!msg || msg->type == FINISH) {
             send_finish();
+        }
+        else if (msg->type == BAL_UPDATE) {
+            cout << "Player " << msg->chosen_id << " realizou a jogada\n";
+            Scores[msg->chosen_id] = msg->tokens;
+            send_msg(msg);
+            print_scores();
+            if (is_over()) {
+                cout << "Player " << msg->chosen_id << " está sem fichas\n"; 
+                cout << "Encerrando o jogo\n";
+                exit(0);
+            }
         }
     }
     else if (msg->type == BAL_UPDATE) {
