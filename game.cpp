@@ -332,7 +332,7 @@ int player_side() {
 
 
 void play_game() {
-    cout << "Bem vindo ao jogo!\n";
+    cout << "Bem vindo ao jogo Player " << ID << " !\n";
     cout << "Aqui estão os scores iniciais\n";
     print_scores();
     for(;;) {
