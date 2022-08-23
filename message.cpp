@@ -13,5 +13,5 @@ unsigned count_1s(Message * msg)
     for(aux = msg->combination; aux; aux >>= 1)
         count += (aux & 1);
         
-    return count;
+    return count % 2;
 }
